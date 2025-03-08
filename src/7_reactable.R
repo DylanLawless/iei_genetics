@@ -62,7 +62,7 @@ df_t <- reactable(
     #   }
     # ),
     
-    "OMIM_ID" = colDef(
+    "OMIM ID" = colDef(
       minWidth = 140,
       cell = function(value, index) {
         if (is.na(value) || value == "") {

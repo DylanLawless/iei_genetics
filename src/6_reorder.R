@@ -1,7 +1,7 @@
 cat(paste(shQuote(names(df)), collapse = ", "))
 
 df <- df |>
-  select(
+  dplyr::select(
     'Major category', 
     'Subcategory', 
     'Disease', 

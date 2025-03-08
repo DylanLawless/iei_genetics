@@ -43,7 +43,7 @@ df <- separate(df, Inheritance, into = c("Inheritance", "Inheritance detail"), s
 df$Inheritance %>% unique()
 
 df$OMIM_ID <- df$OMIM
-df <- df %>% select(-OMIM)
+df <- df %>% dplyr::select(-OMIM)
 
 df$OMIM_ID <- str_replace_all(df$OMIM_ID," ","") # stupid white spaces
 df$OMIM_ID <- str_replace_all(df$OMIM_ID,"Not yet attributed",NA_character_) # (-_-) 

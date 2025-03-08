@@ -18,5 +18,6 @@ df <- df %>%
     `HPO combined` = paste(unique(`HPO combined`), collapse = "; "),
     `HPO term` = paste(`HPO term`, collapse = "; ")
   ) %>%
-  right_join(df %>% mutate(row_id = row_number()) %>% select(-`HPO combined`), by = "row_id") %>%
-  select(-row_id)
+  right_join(df %>% mutate(row_id = row_number()) %>% 
+               dplyr::select(-`HPO combined`), by = "row_id") %>%
+  dplyr::select(-row_id)
