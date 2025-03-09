@@ -1,10 +1,11 @@
 # for value coloring, there can be no NAs (but character string "NA")
 library(reactable)
 library(htmltools)
+library(tippy)
 
 
 # reactable ----
-library(reactable)
+
 options(reactable.theme = reactableTheme(
   borderColor = "#dfe2e5",
   stripedColor = "#E5E5E5",
@@ -17,6 +18,8 @@ options(reactable.theme = reactableTheme(
 
 df_t <- reactable(
   df,
+  # height = 800,
+  bordered = TRUE,
   elementId = "df-select",
   compact = TRUE,
   searchable = TRUE,
@@ -31,20 +34,135 @@ df_t <- reactable(
   defaultColDef = colDef(minWidth = 140),
 
   columns = list(
-    "Disease" = colDef(minWidth = 200), 
+    
+    "Major category" = colDef(
+      header = function() {
+        tippy("Major category &#9432;", tooltip = "Definition: Major category of primary immunodeficiencies.", delay = 0, theme = "custom")
+      }
+    ),
+    
+    "Subcategory" = colDef(
+      header = function() {
+        tippy("Subcategory &#9432;", tooltip = "Definition: Subcategory or more detailed classification of the PID.", delay = 0, theme = "custom")
+      }
+    ),
+    
+    Disease = colDef(
+      minWidth = 200,
+      header = function() {
+        tippy("Disease &#9432;", tooltip = "Definition: The type or classification of disease.", delay = 0, theme = "custom")
+      }
+    ),
+    
+    "Genetic defect" = colDef(
+      header = function() {
+        tippy("Genetic defect &#9432;", tooltip = "Definition: The gene or mutation responsible for the condition.", delay = 0, theme = "custom")
+      }
+    ),
+    
+
+    
+    
+    
     "Inheritance" = colDef(
-        filterInput = function(values, name) {htmltools::tags$select(onchange = sprintf("Reactable.setFilter('df-select', '%s', event.target.value || undefined)", name), htmltools::tags$option(value = "", "All"), lapply(sort(unique(values)), function(x) htmltools::tags$option(value = x, x)))}),
+        filterInput = function(values, name) {htmltools::tags$select(onchange = sprintf("Reactable.setFilter('df-select', '%s', event.target.value || undefined)", name), htmltools::tags$option(value = "", "All"), lapply(sort(unique(values)), function(x) htmltools::tags$option(value = x, x)))},
+        
+        header = function() {
+          tippy(
+            "Inheritance &#9432;",
+            tooltip = paste0(
+              "Definition: Mode of inheritance. ",
+              "AD: Autosomal dominant; AR: Autosomal recessive; XL: X-linked; ",
+              "Sporadic/toxin: Sporadic or toxin-induced; AD/AR: Combination; Variable: Variable expression."
+            ),
+            delay = 0,
+            theme = "custom"
+          )
+        }
+        
+        ),
+    
+    
+    
     "T cell count" = colDef(
+      header = function() {
+        tippy(
+          "T cell count &#9432;",
+          tooltip = paste0(
+            "Definition: T cell count status. ",
+            "Possible values: low, normal, high, defective, decreased, variable, mixed."
+          ),
+          delay = 0,
+          theme = "custom"
+        )
+      },
       filterInput = function(values, name) {htmltools::tags$select(onchange = sprintf("Reactable.setFilter('df-select', '%s', event.target.value || undefined)", name), htmltools::tags$option(value = "", "All"), lapply(sort(unique(values)), function(x) htmltools::tags$option(value = x, x)))}),
+    
+    
+    
+    
+
+    
+    
     
     "B cell count" = colDef(
+      header = function() {
+        tippy(
+          "B cell count &#9432;",
+          tooltip = paste0(
+            "Definition: B cell count status. ",
+            "Possible values: normal, borderline, low, decreased, immature, defective, high, abnormal, variable."
+          ),
+          delay = 0,
+          theme = "custom"
+        )
+      },
       filterInput = function(values, name) {htmltools::tags$select(onchange = sprintf("Reactable.setFilter('df-select', '%s', event.target.value || undefined)", name), htmltools::tags$option(value = "", "All"), lapply(sort(unique(values)), function(x) htmltools::tags$option(value = x, x)))}),
+    
+    
+    
+ 
+    
     
     "Neutrophil count" = colDef(
+      header = function() {
+        tippy("Neutrophil count &#9432;", tooltip = "Definition: Neutrophil count status.", delay = 0, theme = "custom")
+      },
       filterInput = function(values, name) {htmltools::tags$select(onchange = sprintf("Reactable.setFilter('df-select', '%s', event.target.value || undefined)", name), htmltools::tags$option(value = "", "All"), lapply(sort(unique(values)), function(x) htmltools::tags$option(value = x, x)))}),
     
+    
+    
+    
     "Ig count" = colDef(
+      header = function() {
+        tippy("Ig count &#9432;", tooltip = "Definition: Immunoglobulin count status.", delay = 0, theme = "custom")
+      },
       filterInput = function(values, name) {htmltools::tags$select(onchange = sprintf("Reactable.setFilter('df-select', '%s', event.target.value || undefined)", name), htmltools::tags$option(value = "", "All"), lapply(sort(unique(values)), function(x) htmltools::tags$option(value = x, x)))}),
+    
+    
+    
+    
+    "ICD9" = colDef(
+      header = function() {
+        tippy("ICD9 &#9432;", tooltip = "Definition: International Classification of Diseases, Ninth Revision code.", delay = 0, theme = "custom")
+      }
+    ),
+    "ICD10" = colDef(
+      header = function() {
+        tippy("ICD10 &#9432;", tooltip = "Definition: International Classification of Diseases, Tenth Revision code.", delay = 0, theme = "custom")
+      }
+    ),
+    "HPO combined" = colDef(
+      header = function() {
+        tippy("HPO combined &#9432;", tooltip = "Definition: Combined Human Phenotype Ontology (HPO) terms.", delay = 0, theme = "custom")
+      }
+    ),
+    "HPO term" = colDef(
+      header = function() {
+        tippy("HPO term &#9432;", tooltip = "Definition: Individual Human Phenotype Ontology (HPO) term.", delay = 0, theme = "custom")
+      }
+    ),
+    
     
     "Inheritance detail" = colDef(minWidth = 140), 
     "Major category" = colDef(minWidth = 200), 
@@ -77,6 +195,54 @@ df_t <- reactable(
       }
     ),
 
+    "T cell details" = colDef(
+      header = function() {
+        tippy("T cell details &#9432;", tooltip = "Definition: Additional details regarding T cell status.", delay = 0, theme = "custom")
+      }
+    ),
+    "B cell details" = colDef(
+      header = function() {
+        tippy("B cell details &#9432;", tooltip = "Definition: Additional details regarding B cell status.", delay = 0, theme = "custom")
+      }
+    ),
+    "Ig details" = colDef(
+      header = function() {
+        tippy("Ig details &#9432;", tooltip = "Definition: Additional details regarding immunoglobulin levels.", delay = 0, theme = "custom")
+      }
+    ),
+    "Neutrophil details" = colDef(
+      header = function() {
+        tippy("Neutrophil details &#9432;", tooltip = "Definition: Additional details regarding neutrophil counts.", delay = 0, theme = "custom")
+      }
+    ),
+    
+    "Associated features" = colDef(
+      header = function() {
+        tippy("Associated features &#9432;", tooltip = "Definition: Other clinical features associated with the disease.", delay = 0, theme = "custom")
+      }
+    ),
+    
+    
+    "OMIM ID" = colDef(
+      header = function() {
+        tippy("OMIM ID &#9432;", tooltip = "Definition: Online Mendelian Inheritance in Man (OMIM) identifier.", delay = 0, theme = "custom")
+      }
+    ),
+    "Other affected cells" = colDef(
+      header = function() {
+        tippy("Other affected cells &#9432;", tooltip = "Definition: Other immune or non-immune cells affected.", delay = 0, theme = "custom")
+      }
+    ),
+    "Inheritance detail" = colDef(
+      header = function() {
+        tippy("Inheritance detail &#9432;", tooltip = "Definition: Further details regarding the mode of inheritance.", delay = 0, theme = "custom")
+      }
+    ),
+    "GOF/DN details" = colDef(
+      header = function() {
+        tippy("GOF/DN details &#9432;", tooltip = "Definition: Details on gain-of-function or dominant-negative effects.", delay = 0, theme = "custom")
+      }
+    ),
     
     "Inheritance" = colDef(
       minWidth = 100,
@@ -106,29 +272,10 @@ df_t <- reactable(
   )
 )
 
+df_t
+  
 
-    # "Disease" = colDef(minWidth = 200), 
-    # 
-    # "Inheritance" = colDef(
-    #   minWidth = 140,
-    #   filterInput = selectFilter
-    # ),
-    # "T cell count" = colDef(
-    #   minWidth = 140,
-    #   filterInput = selectFilter
-    # ),
-    # "B cell count" = colDef(
-    #   minWidth = 140,
-    #   filterInput = selectFilter
-    # ),
-    # "Ig count" = colDef(
-    #   minWidth = 140,
-    #   filterInput = selectFilter
-    # ),
-    # "Neutrophil count" = colDef(
-    #   minWidth = 140,
-    #   filterInput = selectFilter
-    # ),
+
 
 
 
