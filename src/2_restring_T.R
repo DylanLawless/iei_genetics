@@ -1,6 +1,9 @@
 # t cell ----
 
 tcell_lookup <- c(
+  
+  "absent tcrab, all t cells are gd, poor proliferation" = "low",
+  "mild lymphopenia but mostly intact. increased cd4-cd8- dn t cells, decreased  vd2+ gd t, mait and cd56hi nk cells" = "low",
   "increased cd4-cd8-tcr a/b\uf020double negative (dn) t cells" = "high",
   "low cd8, nl cd4 number but poor function" = "low",
   "Low CD4" = "low",

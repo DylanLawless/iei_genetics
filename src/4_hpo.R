@@ -2,12 +2,14 @@
     # install.packages("BiocManager")
 # BiocManager::install("HPO.db")
 
-doterm <- toTable(HPOTERM)
-colnames(doterm)[colnames(doterm) == 'hpoid'] <- 'HPO combined'
-colnames(doterm)[colnames(doterm) == 'term'] <- 'HPO term'
+# Run once ----
+# doterm <- toTable(HPOTERM)
+# colnames(doterm)[colnames(doterm) == 'hpoid'] <- 'HPO combined'
+# colnames(doterm)[colnames(doterm) == 'term'] <- 'HPO term'
+# saveRDS(doterm, file = paste0(data_dir, "hpoterms.Rds"))
 
-# names(doterm)
-# names(df)
+# import ----
+doterm <- readRDS(file = paste0(data_dir, "hpoterms.Rds"))
 
 df <- df %>%
   mutate(row_id = row_number()) %>%

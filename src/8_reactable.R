@@ -8,13 +8,41 @@ library(tippy)
 
 options(reactable.theme = reactableTheme(
   borderColor = "#dfe2e5",
-  stripedColor = "#E5E5E5",
-  highlightColor = "#fcf0e6",
+  # stripedColor = "#E5E5E5",
+  highlightColor = "#FFFFDC",
   cellPadding = "8px 12px",
   style = list(fontFamily = "-apple-system, Arial, BlinkMacSystemFont, Segoe UI, Helvetica,  sans-serif",
                fontSize = "1.0rem"),
   searchInputStyle = list(width = "50%")
 ))
+
+bar_chart <- function(label, width = "100%", height = "16px", fill = "red", background = "#EEEEEE") {
+  bar <- div(style = list(background = fill, width = width, height = height))
+  chart <- div(style = list(flexGrow = 1, marginLeft = "8px", background = background), bar)
+  div(style = list(display = "flex", alignItems = "center"), label, chart)
+}
+
+major_category_colDef <- colDef(
+  minWidth = 200,
+  filterInput = function(values, name) {
+    tags$select(
+      style = "width: auto;",
+      onchange = sprintf("Reactable.setFilter('df-select', '%s', event.target.value || undefined)", name),
+      tags$option(value = "", "All"),
+      lapply(sort(unique(values)), function(x) {
+        tags$option(value = x, major_map[[x]])
+      })
+    )
+  },
+  header = function() {
+    tippy(
+      "Major category &#9432;",
+      tooltip = major_map,
+      delay = 0,
+      theme = "custom"
+    )
+  }
+)
 
 df_t <- reactable(
   df,
@@ -34,14 +62,123 @@ df_t <- reactable(
   defaultColDef = colDef(minWidth = 140),
 
   columns = list(
+    `Major category` = major_category_colDef,
+    Major_category_original = colDef(show = FALSE),
+    AlphaFold_URL = colDef(show = FALSE),
+    Other = colDef(show = FALSE),
+    Pathogenic = colDef(show = FALSE),
     
-    "Major category" = colDef(
+    # VariantCounts = colDef(
+    #   name = "Known pathogenic variants",
+    #   header = function() {
+    #     tippy("Known pathogenic variants &#9432;",
+    #           tooltip = "Displays the count of pathogenic and other variants reported on ClinVar for this gene (Pathogenic / Other).",
+    #           delay = 0, theme = "custom")
+    #   },
+    #   align = "left",
+    #   cell = function(value, index) {
+    #     path_count <- df$Pathogenic[index]
+    #     other_count <- df$Other[index]
+    #     total <- path_count + other_count
+    #     path_width <- ifelse(!is.na(total) & total > 0, (path_count / total) * 100, 0)
+    #     other_width <- ifelse(!is.na(total) & total > 0, (other_count / total) * 100, 0)
+    #     label_text <- paste0(path_count, " / ", other_count)
+    #     
+    #     div(
+    #       style = list(display = "flex", alignItems = "center"),
+    #       div(
+    #         style = list(marginRight = "8px", fontSize = "12px", color = "black"),
+    #         label_text
+    #       ),
+    #       div(
+    #         style = list(
+    #           position = "relative",
+    #           display = "flex",
+    #           width = "100px",
+    #           height = "16px",
+    #           border = "1px solid #ccc",
+    #           borderRadius = "4px",
+    #           overflow = "hidden"
+    #         ),
+    #         div(
+    #           style = list(
+    #             width = paste0(path_width, "%"),
+    #             height = "100%",
+    #             background = "red"
+    #           )
+    #         ),
+    #         div(
+    #           style = list(
+    #             width = paste0(other_width, "%"),
+    #             height = "98%",
+    #             background = "#ffcb95"
+    #           )
+    #         )
+    #       )
+    #     )
+    #   }
+    #   ),
+    
+    VariantCounts = colDef(
+      name = "ClinVar pathogenic variants",
       header = function() {
-        tippy("Major category &#9432;", tooltip = "Definition: Major category of primary immunodeficiencies.", delay = 0, theme = "custom")
+        tippy("Known pathogenic variants &#9432;",
+              tooltip = "Displays the count of pathogenic and other variants reported on ClinVar for this gene (Pathogenic / Other). Click to view detailed info on ClinVar",
+              delay = 0, theme = "custom")
+      },
+      align = "left",
+      cell = function(value, index) {
+        path_count <- df$Pathogenic[index]
+        other_count <- df$Other[index]
+        total <- path_count + other_count
+        path_width <- ifelse(!is.na(total) & total > 0, (path_count / total) * 100, 0)
+        other_width <- ifelse(!is.na(total) & total > 0, (other_count / total) * 100, 0)
+        label_text <- paste0(path_count, " / ", other_count)
+        
+        url <- sprintf("https://www.ncbi.nlm.nih.gov/clinvar/?term=%s", df$`Genetic defect`[index])
+        
+        htmltools::tags$a(
+          href = url,
+          target = "_blank",
+          div(
+            style = list(display = "flex", alignItems = "center"),
+            div(
+              style = list(marginRight = "8px", fontSize = "12px", color = "black"),
+              label_text
+            ),
+            div(
+              style = list(
+                position = "relative",
+                display = "flex",
+                width = "100px",
+                height = "16px",
+                border = "1px solid #ccc",
+                borderRadius = "4px",
+                overflow = "hidden"
+              ),
+              div(
+                style = list(
+                  width = paste0(path_width, "%"),
+                  height = "100%",
+                  background = "red"
+                )
+              ),
+              div(
+                style = list(
+                  width = paste0(other_width, "%"),
+                  height = "98%",
+                  background = "#ffcb95"
+                )
+              )
+            )
+          )
+        )
       }
     ),
     
+    
     "Subcategory" = colDef(
+      minWidth = 200,
       header = function() {
         tippy("Subcategory &#9432;", tooltip = "Definition: Subcategory or more detailed classification of the PID.", delay = 0, theme = "custom")
       }
@@ -56,14 +193,10 @@ df_t <- reactable(
     
     "Genetic defect" = colDef(
       header = function() {
-        tippy("Genetic defect &#9432;", tooltip = "Definition: The gene or mutation responsible for the condition.", delay = 0, theme = "custom")
+        tippy("Genetic defect &#9432;", tooltip = "Definition: The gene or variant responsible for the condition.", delay = 0, theme = "custom")
       }
     ),
-    
 
-    
-    
-    
     "Inheritance" = colDef(
         filterInput = function(values, name) {htmltools::tags$select(onchange = sprintf("Reactable.setFilter('df-select', '%s', event.target.value || undefined)", name), htmltools::tags$option(value = "", "All"), lapply(sort(unique(values)), function(x) htmltools::tags$option(value = x, x)))},
         
@@ -73,7 +206,7 @@ df_t <- reactable(
             tooltip = paste0(
               "Definition: Mode of inheritance. ",
               "AD: Autosomal dominant; AR: Autosomal recessive; XL: X-linked; ",
-              "Sporadic/toxin: Sporadic or toxin-induced; AD/AR: Combination; Variable: Variable expression."
+              "Sporadic: Sporadic or toxin-induced; AD/AR: Combination."
             ),
             delay = 0,
             theme = "custom"
@@ -82,12 +215,10 @@ df_t <- reactable(
         
         ),
     
-    
-    
-    "T cell count" = colDef(
+    "T cell" = colDef(
       header = function() {
         tippy(
-          "T cell count &#9432;",
+          "T cell &#9432;",
           tooltip = paste0(
             "Definition: T cell count status. ",
             "Possible values: low, normal, high, defective, decreased, variable, mixed."
@@ -98,17 +229,10 @@ df_t <- reactable(
       },
       filterInput = function(values, name) {htmltools::tags$select(onchange = sprintf("Reactable.setFilter('df-select', '%s', event.target.value || undefined)", name), htmltools::tags$option(value = "", "All"), lapply(sort(unique(values)), function(x) htmltools::tags$option(value = x, x)))}),
     
-    
-    
-    
-
-    
-    
-    
-    "B cell count" = colDef(
+    "B cell" = colDef(
       header = function() {
         tippy(
-          "B cell count &#9432;",
+          "B cell &#9432;",
           tooltip = paste0(
             "Definition: B cell count status. ",
             "Possible values: normal, borderline, low, decreased, immature, defective, high, abnormal, variable."
@@ -119,69 +243,92 @@ df_t <- reactable(
       },
       filterInput = function(values, name) {htmltools::tags$select(onchange = sprintf("Reactable.setFilter('df-select', '%s', event.target.value || undefined)", name), htmltools::tags$option(value = "", "All"), lapply(sort(unique(values)), function(x) htmltools::tags$option(value = x, x)))}),
     
-    
-    
- 
-    
-    
-    "Neutrophil count" = colDef(
+
+    "Neutrophil" = colDef(
       header = function() {
-        tippy("Neutrophil count &#9432;", tooltip = "Definition: Neutrophil count status.", delay = 0, theme = "custom")
+        tippy("Neutrophil &#9432;", tooltip = "Definition: Neutrophil count status.", delay = 0, theme = "custom")
       },
       filterInput = function(values, name) {htmltools::tags$select(onchange = sprintf("Reactable.setFilter('df-select', '%s', event.target.value || undefined)", name), htmltools::tags$option(value = "", "All"), lapply(sort(unique(values)), function(x) htmltools::tags$option(value = x, x)))}),
     
-    
-    
-    
-    "Ig count" = colDef(
+    "Ig" = colDef(
       header = function() {
-        tippy("Ig count &#9432;", tooltip = "Definition: Immunoglobulin count status.", delay = 0, theme = "custom")
+        tippy("Ig &#9432;", tooltip = "Definition: Immunoglobulin count status.", delay = 0, theme = "custom")
       },
       filterInput = function(values, name) {htmltools::tags$select(onchange = sprintf("Reactable.setFilter('df-select', '%s', event.target.value || undefined)", name), htmltools::tags$option(value = "", "All"), lapply(sort(unique(values)), function(x) htmltools::tags$option(value = x, x)))}),
-    
-    
-    
     
     "ICD9" = colDef(
+      minWidth = 100,
       header = function() {
         tippy("ICD9 &#9432;", tooltip = "Definition: International Classification of Diseases, Ninth Revision code.", delay = 0, theme = "custom")
       }
     ),
     "ICD10" = colDef(
+      minWidth = 100,
       header = function() {
         tippy("ICD10 &#9432;", tooltip = "Definition: International Classification of Diseases, Tenth Revision code.", delay = 0, theme = "custom")
       }
     ),
-    "HPO combined" = colDef(
+    "HPO IDs" = colDef(
+      minWidth = 120,
       header = function() {
         tippy("HPO combined &#9432;", tooltip = "Definition: Combined Human Phenotype Ontology (HPO) terms.", delay = 0, theme = "custom")
       }
     ),
     "HPO term" = colDef(
+      minWidth = 270,
       header = function() {
         tippy("HPO term &#9432;", tooltip = "Definition: Individual Human Phenotype Ontology (HPO) term.", delay = 0, theme = "custom")
       }
     ),
     
-    
     "Inheritance detail" = colDef(minWidth = 140), 
-    "Major category" = colDef(minWidth = 200), 
-    "Subcategory" = colDef(minWidth = 200), 
+
     "Associated features" = colDef(minWidth = 280), 
-    "ICD9" = colDef(minWidth = 100),
-    "ICD10" = colDef(minWidth = 100),
-    "HPO combined" = colDef(minWidth = 120),
-    "HPO term" = colDef(minWidth = 270),
-    # "OMIM_ID" = colDef(
+    # 
+    # "AlphaFold_URL" = colDef(
     #   minWidth = 140,
+    #   header = function() {
+    #     tippy(
+    #       "AlphaFold &#9432;",
+    #       tooltip = "AlphaFold page: Click to view detailed protein structure information. The link displays the UniProt accession ID.",
+    #       delay = 0,
+    #       theme = "custom"
+    #     )
+    #   },
     #   cell = function(value, index) {
-    #     url <- sprintf("https://www.omim.org/entry/%s", df[index, "OMIM_ID"])
+    #     if (is.na(value) || value == "") return("")
+    #     url <- paste0("https://alphafold.ebi.ac.uk/entry/", value)
     #     htmltools::tags$a(href = url, target = "_blank", as.character(value))
     #   }
     # ),
+    # 
+    
+    "Uniprot" = colDef(
+      minWidth = 140,
+      header = function() {
+        tippy(
+          "Alpha Missense / Uniprod ID &#9432;",
+          tooltip = "Detailed pathogenicity and protein structure info from Alpha Missense and AlphaFold. UniProt accession ID displayed.",
+          delay = 0,
+          theme = "custom"
+        )
+      },
+      cell = function(value, index) {
+        url <- sprintf("https://www.alphafold.ebi.ac.uk/entry/%s", df[index, "AlphaFold_URL"], value)
+        htmltools::tags$a(href = url, target = "_blank", as.character(value))
+      }
+    ),
     
     "OMIM ID" = colDef(
       minWidth = 140,
+      header = function() {
+        tippy(
+          "OMIM &#9432;",
+          tooltip = "Online Mendelian Inheritance in Man. Catalog of Human Genes and Genetic Disorders.",
+          delay = 0,
+          theme = "custom"
+        )
+      },
       cell = function(value, index) {
         if (is.na(value) || value == "") {
           query <- df[index, "Genetic defect"]
@@ -222,7 +369,6 @@ df_t <- reactable(
       }
     ),
     
-    
     "OMIM ID" = colDef(
       header = function() {
         tippy("OMIM ID &#9432;", tooltip = "Definition: Online Mendelian Inheritance in Man (OMIM) identifier.", delay = 0, theme = "custom")
@@ -245,17 +391,17 @@ df_t <- reactable(
     ),
     
     "Inheritance" = colDef(
-      minWidth = 100,
+      # minWidth = 100,
       style = function(value) {
         if (value == "AD/AR") {
           color <- "#962fbf"
-        } else if (value == "Variable") {
-          color <- "#962fbf"
+        # } else if (value == "Variable") {
+          # color <- "#962fbf"
         } else if (value == "AR") {
           color <- "#4f5bd5"
         } else if (value == "AD") {
           color <- "#d62976"
-        } else if (value == "Sporadic/toxin") {
+        } else if (value == "Sporadic") {
           color <- "#e5ab00"
         } else if (value == "XL") {
           color <- "#fa7e1e"
