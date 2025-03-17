@@ -1,15 +1,12 @@
-# version 1
-* Made from Lawless Genomics project pre 2024.
+# Version 1
+* Initial release based on the Lawless Genomics project (mid-2022).
+First public commit on Jun 25, 2022 <https://github.com/DylanLawless/genomics_tools/tree/master/iuis_iei_table>.
+* Incorporated foundational code for data cleaning, gene splitting, and merging with external annotations.
 
-# version 2
-* Made with new IEI genetics page in mind and shared as v1 table on homepage.
+# Version 2
+* Developed with the new IEI genetics page in mind and deployed as the v1 table on the homepage.
 
-# version 3
-
-* Majority of the final version is already completed.
-
-* Changelog starts here.
-
+# Version 3
 **Date:** 2025-03-16
 * Done - Greek letters: use labels with Greek letters in cells while making them searchable by their Latin counterparts (e.g. "α" searchable as "a"); add a comment explaining this functionality.
 * Done and quite a pain - Major categories dropdown: enable selection of major categories from a dropdown list, showing original names in the dropdown and abbreviations in the table - remain in global search with hidden column.
@@ -25,5 +22,9 @@
     - Example: here the PDF manuscript lists three IRF4 - the third IRF4 in Table 6.9 is missing in the xlsx. I have to go with the xlsx version.
     - Agamma and hypogamma label? I would report the IUIS data rather than subjectively change which label is used since they both have meaning.
     - Disease naming: I will clean "IRF4 multimorphic R95T" to "IRF4 multimorphic" but otherwise report IUIS.
-* AlphaFold and AlphaMissense data
+* AlphaFold and AlphaMissense data and links.
+* Further integration with external databases (OMIM, HPO) to enrich gene-disease associations.  
+* CliVar whole genome summary and merge with IEI to give spark lines link to clinvar.
+* Expanded error checking and handling for ambiguous or missing entries in the raw data.  
+* Optimisations for large-scale data processing and improved interactivity of the web-based table interface.
 
