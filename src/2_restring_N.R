@@ -2,14 +2,14 @@ neutro_lookup <- c(
   "normal" = "normal",
   "low" = "low",
   "variable" = "variable",
-  "severe neutropenia" = "severe",
+  "severe neutropenia" = "low",
   "normal to low" = "mixed",
   "high" = "high",
   "variable neutropenia" = "variable",
   "normal but dysfunctional" = "defective",
-  "pancytopenia" = "pancytopenia",
+  "low" = "low",
   "neutropenia with active hlh" = "defective",
-  "mild pancytopenia" = "pancytopenia",
+  "mild low" = "low",
   "neutropenia" = "low"
 )
 
