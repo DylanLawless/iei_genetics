@@ -41,7 +41,7 @@ saveRDS(df, "../output/df_processed.Rds")
 html_file <-  "../output/iusis_iei_table_2025.html"
 img_file <-  "../output/iusis_iei_table_2025.png"
 # reactablefmtr::save_reactable(df_t, html_file)
-df <- df |> select(-probabilities)
+df <- df |> dplyr::select(-probabilities)
 write.table(df, file = "../output/iusis_iei_table_2025.tsv", sep = "\t", row.names = FALSE)
 saveWidget(widget = df_t, file = html_file, selfcontained = TRUE)
 webshot(url = html_file, file = img_file, delay = 0.1,
