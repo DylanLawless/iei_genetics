@@ -19,6 +19,7 @@ md5sum
 df <-  readxl::read_xlsx(source)
 data_dir <- "~/web/iei_genetics/data/"
 gene_variant_summary_clean <- readRDS(file = paste0(data_dir, "gene_variant_summary.Rds"))
+clinvar_summary <- readRDS(file = paste0(data_dir, "clinvar_summary.Rds"))
 
 source("1_clean.R")
 source("2_restring_B.R")
@@ -31,14 +32,16 @@ source("5_rename.R")
 source("6_alpha.R")
 # source("7_clinvar.R") # run once then skip - import data_dir
 source("8_add_clinvar.R")
-source("9_reorder.R")
-source("8_reactable.R")
+source("9_add_var_risk_est.R")
+source("10_reorder.R")
+source("11_reactable.R")
 df_t
 
 saveRDS(df, "../output/df_processed.Rds")
 html_file <-  "../output/iusis_iei_table_2025.html"
 img_file <-  "../output/iusis_iei_table_2025.png"
 # reactablefmtr::save_reactable(df_t, html_file)
+df <- df |> select(-probabilities)
 write.table(df, file = "../output/iusis_iei_table_2025.tsv", sep = "\t", row.names = FALSE)
 saveWidget(widget = df_t, file = html_file, selfcontained = TRUE)
 webshot(url = html_file, file = img_file, delay = 0.1,

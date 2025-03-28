@@ -17,22 +17,22 @@ score_map <- c(
   "Pathogenic" = 5,
   "Likely pathogenic" = 4,
   "Pathogenic, low penetrance" = 3,
-  "likely pathogenic, low penetrance" = 2,
-  "Benign" = -5,
-  "Likely benign" = -4,
-  "drug response" = 0,
-  "Uncertain significance" = 0,
+  "likely pathogenic, low penetrance" = 3,
   "Conflicting classifications of pathogenicity" = 2,
   "risk factor" = 1,
   "association" = 1,
+  "likely risk allele" = 1,
+  "drug response" = 0,
+  "Uncertain significance" = 0,
   "no classification for the single variant" = 0,
   "no classifications from unflagged records" = 0,
   "Affects" = 0,
   "other" = 0,
   "not provided" = 0,
+  "uncertain risk allele" = 0,
   "protective" = -3,
-  "likely risk allele" = 1,
-  "uncertain risk allele" = 0
+  "Likely benign" = -4,
+  "Benign" = -5
 )
 
 # Read the header line, remove the leading '#' and split into column names
@@ -68,6 +68,8 @@ read_delim_chunked(
 final_results <- bind_rows(accumulated) %>%
   group_by(GeneSymbol, ClinicalSignificance) %>%
   summarise(total = sum(n), .groups = "drop")
+
+head(accumulated[4])
 
 # print(final_results)
 
@@ -129,8 +131,7 @@ ranked_terms <- data.frame(
   stringsAsFactors = FALSE
 )
 
-print(ranked_terms)
-
+# print(ranked_terms)
 
 # plot ranks ----
 # First, join the final_results with ranked_terms to add the computed rank per ClinicalSignificance entry.
@@ -239,8 +240,8 @@ common_genes <- intersect(unique_no_semicolon, unique_split)
 cat("Number of unique gene symbols without semicolon:", length(unique_no_semicolon), "\n")
 cat("Number of unique gene symbols from split rows:", length(unique_split), "\n")
 cat("Number of common gene symbols:", length(common_genes), "\n")
-print(common_genes)
-print(unique_split)
+# print(common_genes)
+# print(unique_split)
 
 gene_variant_summary_clean <- gene_variant_summary %>%
   separate_rows(GeneSymbol, sep = ";") %>%
@@ -277,17 +278,118 @@ p_stacked <- gene_variant_summary_clean |>
 
 print(p_stacked)
 
-ggsave(patch1, file = paste0(output, "patch1.png"), height = 5, width = 6)
-ggsave(p1, file = paste0(output, "p1.png"), height = 4, width = 6)
-ggsave(patch2, file = paste0(output, "patch2.png"), height = 5, width = 6)
-ggsave(p1_hist, file = paste0(output, "p1_hist.png"), height = 4, width = 6)
-ggsave(p_stacked, file = paste0(output, "p_stacked.png"), height = 5, width = 6)
+ggsave(patch1, file = paste0(output, "p_gene_summary_patch1.png"), height = 5, width = 6)
+ggsave(p1, file = paste0(output, "p_gene_summary_p1.png"), height = 4, width = 6)
+ggsave(patch2, file = paste0(output, "p_gene_summary_hist_patch2.png"), height = 5, width = 6)
+ggsave(p1_hist, file = paste0(output, "p_gene_summary_p1_hist.png"), height = 4, width = 6)
+ggsave(p_stacked, file = paste0(output, "p_gene_summary_stacked.png"), height = 5, width = 6)
 
-ggsave(patch1, file = paste0(clinvar_out, "patch1.png"), height = 5, width = 6)
-ggsave(p1, file = paste0(clinvar_out, "p1.png"), height = 4, width = 6)
-ggsave(patch2, file = paste0(clinvar_out, "patch2.png"), height = 5, width = 6)
-ggsave(p1_hist, file = paste0(clinvar_out, "p1_hist.png"), height = 4, width = 6)
-ggsave(p_stacked, file = paste0(clinvar_out, "p_stacked.png"), height = 5, width = 6)
+ggsave(patch1, file = paste0(clinvar_out, "p_gene_summary_patch1.png"), height = 5, width = 6)
+ggsave(p1, file = paste0(clinvar_out, "p_gene_summary_p1.png"), height = 4, width = 6)
+ggsave(patch2, file = paste0(clinvar_out, "p_gene_summary_hist_patch2.png"), height = 5, width = 6)
+ggsave(p1_hist, file = paste0(clinvar_out, "p_gene_summary_p1_hist.png"), height = 4, width = 6)
+ggsave(p_stacked, file = paste0(clinvar_out, "p_gene_summary_stacked.png"), height = 5, width = 6)
 
 saveRDS(gene_variant_summary_clean, file = paste0(output, "gene_variant_summary.Rds"))
 saveRDS(gene_variant_summary_clean, file = paste0(clinvar_sum, "gene_variant_summary.Rds"))
+
+
+# Version 2 ----
+
+final_results
+
+
+score_map <- c(
+  "Pathogenic" = 5,
+  "Likely pathogenic" = 4,
+  "Pathogenic, low penetrance" = 3,
+  "likely pathogenic, low penetrance" = 2,
+  "Conflicting classifications of pathogenicity" = 2,
+  "risk factor" = 1,
+  "association" = 1,
+  "drug response" = 0,
+  "Uncertain significance" = 0,
+  "no classification for the single variant" = 0,
+  "no classifications from unflagged records" = 0,
+  "Affects" = 0,
+  "other" = 0,
+  "not provided" = 0,
+  "likely risk allele" = 1,
+  "uncertain risk allele" = 0,
+  "protective" = -3,
+  "Likely benign" = -4,
+  "Benign" = -5
+)
+
+
+get_score <- function(clinvar) {
+  # standardise the term: replace underscores with spaces
+  clinvar <- str_replace_all(clinvar, "_", " ")
+  # split on "/" or "|" (or both)
+  terms <- str_split(clinvar, "[/|]", simplify = TRUE)
+  terms <- str_trim(terms)
+  # get scores for each term; if term not found, assume 0
+  scores <- sapply(terms, function(x) if (x %in% names(score_map)) score_map[[x]] else 0)
+  mean(scores)
+}
+
+# Calculate a score for each row
+final_results_gene_scored <- final_results %>%
+  mutate(score = map_dbl(ClinicalSignificance, get_score))
+
+# Compute total count per gene and reorder gene names by descending total count
+gene_totals <- final_results_gene_scored %>%
+  group_by(GeneSymbol) %>%
+  summarise(total_count = sum(total))
+
+final_results_gene_scored <- final_results_gene_scored %>%
+  left_join(gene_totals, by = "GeneSymbol") %>%
+  mutate(GeneSymbol = reorder(GeneSymbol, -total_count))
+
+# Order stacking within each gene by increasing score
+final_results_gene_scored <- final_results_gene_scored %>%
+  group_by(GeneSymbol) %>%
+  arrange(score) %>%
+  mutate(score_factor = factor(score, levels = unique(score))) %>%
+  ungroup()
+
+
+
+final_results_gene_scored <- final_results_gene_scored %>%
+  filter(!str_detect(GeneSymbol, ";"))
+
+
+
+
+
+
+names(final_results_gene_scored)
+
+clinvar_summary <- final_results_gene_scored %>%
+  group_by(GeneSymbol) %>%
+  summarise(
+    score5 = sum(if_else(score == 5, total, 0L)),
+    score4 = sum(if_else(score >=3 & score <= 4, total, 0L)),
+    score2 = sum(if_else(score >= 0 & score <= 2, total, 0L)),
+    score0 = sum(if_else(score >= -5 & score <= -1, total, 0L)),
+  ) %>%
+  ungroup() %>%
+  mutate(VariantCounts = paste(score5, score4, score2,score0, sep = " / "))
+
+
+# max_pathogenic <- max(gene_summary$Pathogenic, na.rm = TRUE)
+# max_total <- max(gene_summary$Pathogenic + gene_summary$Other, na.rm = TRUE)
+
+# clinvar_summary <- merge(gene_summary, gene_variant_summary_clean)
+names(clinvar_summary)
+colnames(clinvar_summary)[colnames(clinvar_summary) == 'GeneSymbol'] <- 'Genetic defect'
+colnames(clinvar_summary)[colnames(clinvar_summary) == 'score5'] <- 'score5.ClnVar'
+colnames(clinvar_summary)[colnames(clinvar_summary) == 'score4'] <- 'score4.ClnVar'
+colnames(clinvar_summary)[colnames(clinvar_summary) == 'score2'] <- 'score2.ClnVar'
+colnames(clinvar_summary)[colnames(clinvar_summary) == 'score0'] <- 'score0.ClnVar'
+colnames(clinvar_summary)[colnames(clinvar_summary) == 'VariantCounts'] <- 'VariantCounts.ClnVar'
+saveRDS(clinvar_summary, file = paste0(output, "clinvar_summary.Rds"))
+saveRDS(clinvar_summary, file = paste0(clinvar_sum, "clinvar_summary.Rds"))
+
+
+# df <- merge(df, varRisEst_summary, by= "Genetic defect", all.x = TRUE )
