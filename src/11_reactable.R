@@ -78,24 +78,37 @@ df_t <- reactable(
     "median_prob"   = colDef(show = FALSE),
     "min_prob"   = colDef(show = FALSE),
     "max_prob"   = colDef(show = FALSE),
-    # "GeneSymbol"   = colDef(show = FALSE),
-  
+    "q1_prob"   = colDef(show = FALSE),
+    "q3_prob"   = colDef(show = FALSE),
+    
     # probabilities = colDef(
-    #       name = "Probability Boxplot",
-    #       cell = function(value, index) {
-    #         sparkline(value, type = "box")
-    #       }
-    #     ),
-
+    #     header = function() {
+    #       tippy("Prior prob of observing pathogenic &#9432;",
+    #             tooltip = "The prior probability (-log10) of observing a patient with candidate causal pathogenic variant/s matching the disease mode of inheritance. On this scale, higher values indidicate higher prevalence, but possibly more false positives. See publication for details.",
+    #             delay = 0, theme = "custom")
+    #     },
+    #   cell = function(value, index) {
+    #     # Use the pre-calculated min, median, max values to create a reduced dataset
+    #     vals <- -log10(c(df$min_prob[index], df$median_prob[index], df$max_prob[index]))
+    #     sparkline(vals, type = "box")
+    #   }
+    # ),
+    
+    # Define the column with the sparkline box plot including whiskers
     probabilities = colDef(
-        header = function() {
-          tippy("Prior prob of observing pathogenic &#9432;",
-                tooltip = "The prior probability (-log10) of observing a patient with candidate causal pathogenic variant/s matching the disease mode of inheritance. On this scale, higher values indidicate higher prevalence, but possibly more false positives. See publication for details.",
-                delay = 0, theme = "custom")
-        },
+      header = function() {
+        tippy("Prior prob of observing pathogenic &#9432;",
+              tooltip = "The prior probability (-log10) of observing a patient with candidate causal pathogenic variant/s matching the disease mode of inheritance. On this scale, higher values indicate higher prevalence, but possibly more false positives. See publication for details.",
+              delay = 0, theme = "custom")
+      },
       cell = function(value, index) {
-        # Use the pre-calculated min, median, max values to create a reduced dataset
-        vals <- -log10(c(df$min_prob[index], df$median_prob[index], df$max_prob[index]))
+        vals <- -log10(c(
+          df$min_prob[index],
+          df$q1_prob[index],
+          df$median_prob[index],
+          df$q3_prob[index],
+          df$max_prob[index]
+        ))
         sparkline(vals, type = "box")
       }
     ),
@@ -108,7 +121,7 @@ df_t <- reactable(
       },
     ),
     
-    # variant counts 3 ----    
+    # variant counts clinvar ----    
     VariantCounts.ClnVar = colDef(
       name = "ClinVar all classification reports",
       header = function() {
@@ -187,7 +200,7 @@ df_t <- reactable(
       }
     ),
     
-# variant counts 3 ----    
+# variant counts VRE ----    
 VariantCounts.VRE = colDef(
   name = "ClinVar SNV",
   header = function() {
@@ -265,29 +278,23 @@ VariantCounts.VRE = colDef(
     )
   }
 ),
-    # variantcounts 2  ----
     
-    # VariantCounts.VRE = colDef(
-    #   name = "ClinVar variant groups",
+    # # variantcounts 0 ----
+    # VariantCounts = colDef(
+    #   name = "ClinVar pathogenic variants",
     #   header = function() {
-    #     tippy("ClinVar variant groups &#9432;",
-    #           tooltip = "black: Pathogenic (5) / purple: Likely pathogenic (4) / navy: Pathogenic, low penetrance (3) / lightblue: Likely pathogenic, low penetrance (0-2) / red: Benign (-5 to -1)",
+    #     tippy("Known pathogenic variants &#9432;",
+    #           tooltip = "Displays the count of pathogenic and other variants reported on ClinVar for this gene (Pathogenic / Other). Click to view detailed info on ClinVar",
     #           delay = 0, theme = "custom")
     #   },
     #   align = "left",
     #   cell = function(value, index) {
-    #     s5 <- df$score5[index]
-    #     s4 <- df$score4[index]
-    #     s3 <- df$score3[index]
-    #     s2 <- df$score2[index]
-    #     s0 <- df$score0[index]
-    #     total <- s5 + s4 + s3 + s2 + s0
-    #     width_s5 <- ifelse(total > 0, (s5 / total) * 100, 0)
-    #     width_s4 <- ifelse(total > 0, (s4 / total) * 100, 0)
-    #     width_s3 <- ifelse(total > 0, (s3 / total) * 100, 0)
-    #     width_s2 <- ifelse(total > 0, (s2 / total) * 100, 0)
-    #     width_s0 <- ifelse(total > 0, (s0 / total) * 100, 0)
-    #     label_text <- paste0(s5, " / ", s4, " / ", s3, " / ", s2, " / ", s0)
+    #     path_count <- df$Pathogenic[index]
+    #     other_count <- df$Other[index]
+    #     total <- path_count + other_count
+    #     path_width <- ifelse(!is.na(total) & total > 0, (path_count / total) * 100, 0)
+    #     other_width <- ifelse(!is.na(total) & total > 0, (other_count / total) * 100, 0)
+    #     label_text <- paste0(path_count, " / ", other_count)
     #     
     #     url <- sprintf("https://www.ncbi.nlm.nih.gov/clinvar/?term=%s", df$`Genetic defect`[index])
     #     
@@ -304,45 +311,24 @@ VariantCounts.VRE = colDef(
     #           style = list(
     #             position = "relative",
     #             display = "flex",
-    #             width = "200px",
+    #             width = "100px",
     #             height = "16px",
     #             border = "1px solid #ccc",
     #             borderRadius = "4px",
     #             overflow = "hidden"
     #           ),
-    #           htmltools::tags$div(
+    #           div(
     #             style = list(
-    #               width = paste0(width_s5, "%"),
-    #               height = "100%",
-    #               background = "black"
-    #             )
-    #           ),
-    #           htmltools::tags$div(
-    #             style = list(
-    #               width = paste0(width_s4, "%"),
-    #               height = "100%",
-    #               background = "purple"
-    #             )
-    #           ),
-    #           htmltools::tags$div(
-    #             style = list(
-    #               width = paste0(width_s3, "%"),
-    #               height = "100%",
-    #               background = "navy"
-    #             )
-    #           ),
-    #           htmltools::tags$div(
-    #             style = list(
-    #               width = paste0(width_s2, "%"),
-    #               height = "100%",
-    #               background = "lightblue"
-    #             )
-    #           ),
-    #           htmltools::tags$div(
-    #             style = list(
-    #               width = paste0(width_s0, "%"),
+    #               width = paste0(path_width, "%"),
     #               height = "100%",
     #               background = "red"
+    #             )
+    #           ),
+    #           div(
+    #             style = list(
+    #               width = paste0(other_width, "%"),
+    #               height = "98%",
+    #               background = "#ffcb95"
     #             )
     #           )
     #         )
@@ -350,65 +336,6 @@ VariantCounts.VRE = colDef(
     #     )
     #   }
     # ),
-    
-    
-    # variantcounts 0 ----
-    VariantCounts = colDef(
-      name = "ClinVar pathogenic variants",
-      header = function() {
-        tippy("Known pathogenic variants &#9432;",
-              tooltip = "Displays the count of pathogenic and other variants reported on ClinVar for this gene (Pathogenic / Other). Click to view detailed info on ClinVar",
-              delay = 0, theme = "custom")
-      },
-      align = "left",
-      cell = function(value, index) {
-        path_count <- df$Pathogenic[index]
-        other_count <- df$Other[index]
-        total <- path_count + other_count
-        path_width <- ifelse(!is.na(total) & total > 0, (path_count / total) * 100, 0)
-        other_width <- ifelse(!is.na(total) & total > 0, (other_count / total) * 100, 0)
-        label_text <- paste0(path_count, " / ", other_count)
-        
-        url <- sprintf("https://www.ncbi.nlm.nih.gov/clinvar/?term=%s", df$`Genetic defect`[index])
-        
-        htmltools::tags$a(
-          href = url,
-          target = "_blank",
-          div(
-            style = list(display = "flex", alignItems = "center"),
-            div(
-              style = list(marginRight = "8px", fontSize = "12px", color = "black"),
-              label_text
-            ),
-            div(
-              style = list(
-                position = "relative",
-                display = "flex",
-                width = "100px",
-                height = "16px",
-                border = "1px solid #ccc",
-                borderRadius = "4px",
-                overflow = "hidden"
-              ),
-              div(
-                style = list(
-                  width = paste0(path_width, "%"),
-                  height = "100%",
-                  background = "red"
-                )
-              ),
-              div(
-                style = list(
-                  width = paste0(other_width, "%"),
-                  height = "98%",
-                  background = "#ffcb95"
-                )
-              )
-            )
-          )
-        )
-      }
-    ),
     
     
     "Subcategory" = colDef(
@@ -519,24 +446,6 @@ VariantCounts.VRE = colDef(
     "Inheritance detail" = colDef(minWidth = 140), 
 
     "Associated features" = colDef(minWidth = 280), 
-    # 
-    # "AlphaFold_URL" = colDef(
-    #   minWidth = 140,
-    #   header = function() {
-    #     tippy(
-    #       "AlphaFold &#9432;",
-    #       tooltip = "AlphaFold page: Click to view detailed protein structure information. The link displays the UniProt accession ID.",
-    #       delay = 0,
-    #       theme = "custom"
-    #     )
-    #   },
-    #   cell = function(value, index) {
-    #     if (is.na(value) || value == "") return("")
-    #     url <- paste0("https://alphafold.ebi.ac.uk/entry/", value)
-    #     htmltools::tags$a(href = url, target = "_blank", as.character(value))
-    #   }
-    # ),
-    # 
     
     "Uniprot" = colDef(
       minWidth = 140,

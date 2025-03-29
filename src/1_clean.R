@@ -108,7 +108,6 @@ major_map <- c(
   "9. BMF"  = "9. Bone marrow failure"
 )
 
-
 # Replace full category names with abbreviated ones (including their number)
 df$`Major category` <- dplyr::case_when(
   df$`Major category` == "1. Immunodeficiencies affecting cellular and humoral immunity" ~ "1. CID",
@@ -122,6 +121,13 @@ df$`Major category` <- dplyr::case_when(
   df$`Major category` == "9. Bone marrow failure" ~ "9. BMF",
   TRUE ~ df$`Major category`
 )
+
+df$Subcategory <- dplyr::case_when(
+  df$Subcategory == "3. Combined Immunodeficiencies Generally Less Profound than Severe Combined Immunodeficiency" ~ "3. CID Generally Less Profound than SCID",
+  TRUE ~ df$Subcategory
+)
+
+
 
 # 
 # df$`Major category` <- dplyr::case_when(

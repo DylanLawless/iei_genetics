@@ -227,35 +227,72 @@ df <- merge(df, varRisEst_summary, by= "Genetic defect", all.x = TRUE )
 
 
 
-# variant probability sparkline ----
+# # variant probability sparkline ----
+# 
+# # Calculate a score for each row
+# varRisEst_var_scored <- varRisEst_var %>%
+#   mutate(score = map_dbl(clinvar_clnsig, get_score))
+# 
+# varRisEst_var_path <- varRisEst_var_scored |> filter(score >= 4)
+# 
+# varRisEst_var_path_summary <- varRisEst_var_path %>%
+#   ungroup() %>%
+#   group_by(genename) %>%
+#   summarise(probabilities = list(occurrence_prob), .groups = "drop") %>%
+#   mutate(
+#     min_prob = sapply(probabilities, min, na.rm = TRUE),
+#     median_prob = sapply(probabilities, median, na.rm = TRUE),
+#     max_prob = sapply(probabilities, max, na.rm = TRUE)
+#   )
+# 
+# colnames(varRisEst_var_path_summary)[colnames(varRisEst_var_path_summary) == 'genename'] <- 'Genetic defect'
+# 
+# df <- merge(df, varRisEst_var_path_summary, by= "Genetic defect", all.x = TRUE )
+# 
+# df <- df %>%
+#   mutate(
+#     probabilities = map(probabilities, ~ if(all(is.na(.))) rep(0, 3) else replace_na(., 0)),
+#     min_prob = replace_na(min_prob, 0),
+#     median_prob = replace_na(median_prob, 0),
+#     max_prob = replace_na(max_prob, 0)
+#   )
 
+# 
 # Calculate a score for each row
 varRisEst_var_scored <- varRisEst_var %>%
   mutate(score = map_dbl(clinvar_clnsig, get_score))
 
 varRisEst_var_path <- varRisEst_var_scored |> filter(score >= 4)
-
+ 
+# Calculate min, max, Q1, Q3 for probabilities
 varRisEst_var_path_summary <- varRisEst_var_path %>%
   ungroup() %>%
   group_by(genename) %>%
   summarise(probabilities = list(occurrence_prob), .groups = "drop") %>%
   mutate(
     min_prob = sapply(probabilities, min, na.rm = TRUE),
+    q1_prob = sapply(probabilities, function(x) quantile(x, 0.25, na.rm = TRUE)),
     median_prob = sapply(probabilities, median, na.rm = TRUE),
+    q3_prob = sapply(probabilities, function(x) quantile(x, 0.75, na.rm = TRUE)),
     max_prob = sapply(probabilities, max, na.rm = TRUE)
   )
 
-colnames(varRisEst_var_path_summary)[colnames(varRisEst_var_path_summary) == 'genename'] <- 'Genetic defect'
+colnames(varRisEst_var_path_summary)[colnames(varRisEst_var_path_summary) == 'genename'] <- 'Genetic defect'# 
 
-df <- merge(df, varRisEst_var_path_summary, by= "Genetic defect", all.x = TRUE )
+# Merge summary into the main dataframe and handle NA values
+df <- merge(df, varRisEst_var_path_summary, by = "Genetic defect", all.x = TRUE)
 
 df <- df %>%
   mutate(
-    probabilities = map(probabilities, ~ if(all(is.na(.))) rep(0, 3) else replace_na(., 0)),
+    probabilities = map(probabilities, ~ if(all(is.na(.))) rep(0, 5) else replace_na(., 0)),
     min_prob = replace_na(min_prob, 0),
+    q1_prob = replace_na(q1_prob, 0),
     median_prob = replace_na(median_prob, 0),
+    q3_prob = replace_na(q3_prob, 0),
     max_prob = replace_na(max_prob, 0)
   )
+
+
 
 
 # reactable(df, columns = list(
