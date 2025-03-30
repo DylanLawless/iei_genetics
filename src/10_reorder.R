@@ -10,20 +10,19 @@ df <- df |>
     Disease,
     `Genetic defect`,
     Inheritance,
-    ICD9,
-    ICD10,
-    `OMIM ID`,
-    `HPO IDs`,
-    `HPO term`,
-    `Associated features`,
-    Uniprot,
-    AlphaFold_URL,
-
     score_positive_total,
     probabilities,
- 
     VariantCounts.VRE,
     VariantCounts.ClnVar,
+    `OMIM ID`,
+    AlphaFold_URL,
+    Uniprot,
+    `HPO IDs`,
+    `HPO term`,
+    ICD9,
+    ICD10,
+    `Associated features`,
+
     
     `B cell`, `T cell`, Ig, Neutrophil,
   

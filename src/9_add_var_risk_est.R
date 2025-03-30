@@ -3,6 +3,7 @@ library(stringr)
 library(purrr)
 library(scales)
 library(stringr)
+library(ggplot2);theme_set(theme_bw())
 
 varRisEst_gene <- readRDS(file= "../data/var_risk_est/VarRiskEst_PanelAppRex_ID_398_gene_tally.Rds") # gene level 
 varRisEst_var <- readRDS(file= "../data/var_risk_est/VarRiskEst_PanelAppRex_ID_398_gene_variants.Rds") # all variants
@@ -51,7 +52,7 @@ p_score <- ggplot(score_df, aes(x = score, y = reorder(classification_wrapped, s
     x = "Score",
     y = "Classification"
   ) +
-  guides(fill = "none")
+  guides(fill = "none") 
 
 p_score
 
@@ -166,8 +167,8 @@ patch1 <-
 
 
 
-ggsave(patch1, file = "../output/p_varRisEst_summary_scores.pdf", height = 8, width = 10)
-ggsave(patch1, file = "~/web/var_risk_est/images/p_varRisEst_summary_scores.pdf", height = 8, width = 10)
+ggsave(patch1, file = "../output/p_varRisEst_summary_scores.pdf", height = 6, width = 10)
+ggsave(patch1, file = "~/web/var_risk_est/images/p_varRisEst_summary_scores.pdf", height = 6, width = 10)
 
 
   
