@@ -46,3 +46,7 @@ write.table(df, file = "../output/iusis_iei_table_2025.tsv", sep = "\t", row.nam
 saveWidget(widget = df_t, file = html_file, selfcontained = TRUE)
 webshot(url = html_file, file = img_file, delay = 0.1,
         expand = c(10, 50, 0, 50))
+
+# new insights from the improvements
+source("12_untangleR.R")
+source("13_new_categories.R")

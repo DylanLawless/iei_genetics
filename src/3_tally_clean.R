@@ -117,8 +117,8 @@ p4 <- df %>%
 
 # Combine plots with patchwork, collecting axis titles and guides
 
-p0 <- p0 + labs(tag = "(A)")
-pB <- p1 + labs(tag = "(B)")  + p2 + p3 + p4 + plot_layout(ncol = 2) 
+p0 <- p0 + labs(tag = "A")
+pB <- p1 + labs(tag = "B")  + p2 + p3 + p4 + plot_layout(ncol = 2) 
 
 patch1 <- p0 | pB +
   plot_layout(guides = "collect", axis_titles = "collect") 
@@ -148,8 +148,8 @@ p2 <- ggplot(df, aes(x = `Subcategory`)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 
-p1 <- p1 + labs(tag = "(A)")
-p2 <- p2 + labs(tag = "(B)")
+p1 <- p1 + labs(tag = "A")
+p2 <- p2 + labs(tag = "B")
 patch2 <- (p1 / p2)
 
 ggsave(patch2, file = "../output/plot_patch2.pdf", width = 8, height = 5)
@@ -186,8 +186,8 @@ p2 <- ggplot(df_long, aes(x = label)) +
     y = "Count"
   )
 
-p1 <- p1 + labs(tag = "(A)")
-p2 <- p2 + labs(tag = "(B)")
+p1 <- p1 + labs(tag = "A")
+p2 <- p2 + labs(tag = "B")
 
 patch3 <- (p1 | p2)
 ggsave(patch3, file = "../output/plot_patch3.pdf", width = 8, height = 5)

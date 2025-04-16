@@ -7,6 +7,8 @@ library(tidyr)
 library(igraph)
 set.seed(666)
 
+df <- readRDS("../output/df_processed.Rds")
+
 # Load STRING data and protein info
 string_db <- readRDS(file = "../data/string_data_700.rds")
 string_id_df <- data.table::fread('../data/9606.protein.info.v11.5.txt.gz') %>%
@@ -109,9 +111,9 @@ p_net <- ggraph(layout_df) +
 
 print(p_net)
 
-ggsave("../output/untangleR_ppi_network.pdf", plot = p_net, height = 6, width = 9)
+ggsave("../output/untangleR_ppi_network.pdf", plot = p_net, height = 7, width = 9)
 
-ggsave("../output/untangleR_ppi_network.png", plot = p_net, height = 6, width = 9)
+ggsave("../output/untangleR_ppi_network.png", plot = p_net, height = 7, width = 9)
 
 
 # Associtions -----
@@ -233,6 +235,8 @@ embedding_df <- data.frame(
   degree = degree(graph_undirected, mode = "all"),
   cluster = factor(V(graph_undirected)$cluster)
 )
+
+saveRDS(embedding_df, "../output/embedding_df_with_clusters.Rds")
 
 # Determine top nodes (e.g. degree above the 95th percentile) for labelling
 degree_thresh <- quantile(embedding_df$degree, 0.95)
