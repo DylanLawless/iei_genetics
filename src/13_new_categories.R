@@ -281,7 +281,7 @@ for(i in seq_along(sorted_terminals)){
 
 # Save the decision tree plot as a PDF with the custom colors on the leaf nodes
 # pdf("~/web/var_risk_est/images/p_new_classification_finetune_tree.pdf", width = 8, height = 5)
-pdf("../output/p_new_classification_finetune_tree.pdf", width = 8, height = 4)
+pdf("../output/p_new_classification_finetune_tree.pdf", width = 8, height = 3.5)
 library(rpart.plot)
 rpart.plot(model_immuno_fine$finalModel,
            type = 4,
@@ -294,7 +294,7 @@ rpart.plot(model_immuno_fine$finalModel,
 )
 dev.off()
 
-pdf("~/web/var_risk_est/images/p_new_classification_finetune_tree.pdf", width = 8, height = 4)
+pdf("~/web/var_risk_est/images/p_new_classification_finetune_tree.pdf", width = 8, height = 3.5)
 library(rpart.plot)
 rpart.plot(model_immuno_fine$finalModel,
            type = 4,
@@ -359,15 +359,15 @@ p_class <- ggplot(model_df_fine, aes(x = new_PID_classification_descriptive, fil
   scale_x_discrete(labels = function(x) str_wrap(gsub("_", " ", x), width = 15)) +
   labs(#subtitle = "B  Distribution of New PID Classifications",
     # subtitle = "B",
-       x = "New PID Classification",
-       y = "Gene Count") +
+       x = "PID classification:\nPPI + Phenotypes",
+       y = "Gene count") +
   guides(fill = "none") +
-  theme(text=element_text(size=14)) +
+  # theme(text=element_text(size=14)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 p_class
-ggsave("../output/plot_new_pid_classifications_genetic.pdf", plot = p_class, height = 4, width = 8)
-ggsave("~/web/var_risk_est/images/plot_new_pid_classifications_genetic.pdf", plot = p_class, height = 4, width = 8)
+ggsave("../output/plot_new_pid_classifications_genetic.pdf", plot = p_class, height = 3, width = 8)
+ggsave("~/web/var_risk_est/images/plot_new_pid_classifications_genetic.pdf", plot = p_class, height = 3, width = 8)
 
 # Inspect the updated dataframe with the descriptive group names.
 head(model_df_fine)
