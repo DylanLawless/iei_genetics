@@ -154,11 +154,14 @@ gene_summary <- df_with_rank %>%
 # Use shape 21 with black outline and fill based on avg_rank.
 p1 <- ggplot(gene_summary, aes(x = avg_rank, y = total_variants, fill = avg_rank)) +
   geom_point(shape = 21, size = 3, color = "black") +
-  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
+  scale_fill_gradientn(colours = c("navy", "lightblue", "red"),
+                       breaks = c(-5, 0, 5),
+                       limits = c(-6,6),
+                       labels = c("benign", "unknown", "pathogenic")) +
   labs(
     x = "Average Rank Score",
     y = "Count of Variants per Gene",
-    fill = "Avg Rank"
+    fill = "Rank"
   ) +
   theme_bw()
 
@@ -170,11 +173,14 @@ gene_summary <- gene_summary %>% mutate(norm_avg_rank = avg_rank - mean_rank)
 
 p2 <- ggplot(gene_summary, aes(x = norm_avg_rank, y = total_variants, fill = norm_avg_rank)) +
   geom_point(shape = 21, size = 3, color = "black") +
-  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
+  scale_fill_gradientn(colours = c("navy", "lightblue", "red"),
+                       breaks = c(-5, 0, 5),
+                       limits = c(-6,6),
+                       labels = c("benign", "unknown", "pathogenic")) +
   labs(
     x = "Normalized Average Rank Score (zero centered)",
     y = "Count of Variants per Gene",
-    fill = "Norm Avg Rank"
+    fill = "Rank"
   ) +
   theme_bw()
 
@@ -185,11 +191,14 @@ patch1 <- p1 / p2
 # Create histogram of avg_rank: Number of genes per average rank bin
 p1_hist <- ggplot(gene_summary, aes(x = avg_rank)) +
   geom_histogram(bins = 30, color = "black", aes(fill = ..x..)) +
-  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
+  scale_fill_gradientn(colours = c("navy", "lightblue", "red"),
+                       breaks = c(-5, 0, 5),
+                       limits = c(-6,6),
+                       labels = c("benign", "unknown", "pathogenic")) +
   labs(
     x = "Average Rank Score",
     y = "Number of Genes",
-    fill = "Avg Rank"
+    fill = "Rank"
   ) +
   theme_bw()
 
@@ -200,11 +209,14 @@ gene_summary <- gene_summary %>% mutate(norm_avg_rank = avg_rank - mean_rank)
 # Create histogram of norm_avg_rank: Number of genes per normalized rank bin
 p2_hist <- ggplot(gene_summary, aes(x = norm_avg_rank)) +
   geom_histogram(bins = 30, color = "black", aes(fill = ..x..)) +
-  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
+  scale_fill_gradientn(colours = c("navy", "lightblue", "red"),
+                       breaks = c(-5, 0, 5),
+                       limits = c(-6,6),
+                       labels = c("benign", "unknown", "pathogenic")) +
   labs(
     x = "Normalized Average Rank Score (zero centered)",
     y = "Number of Genes",
-    fill = "Norm Avg Rank"
+    fill = "Rank"
   ) +
   theme_bw()
 
@@ -278,20 +290,29 @@ p_stacked <- gene_variant_summary_clean |>
 
 print(p_stacked)
 
+# reshape
+patch1 <- p1 | p2 
+patch2 <- p1_hist | p2_hist
+patch3 <- (patch1 / patch2)  + plot_layout(guides = 'collect', axis = "collect")  + plot_annotation(tag_levels = 'A')
+patch3
+
 ggsave(patch1, file = paste0(output, "p_gene_summary_patch1.png"), height = 5, width = 6)
 ggsave(p1, file = paste0(output, "p_gene_summary_p1.png"), height = 4, width = 6)
 ggsave(patch2, file = paste0(output, "p_gene_summary_hist_patch2.png"), height = 5, width = 6)
 ggsave(p1_hist, file = paste0(output, "p_gene_summary_p1_hist.png"), height = 4, width = 6)
 ggsave(p_stacked, file = paste0(output, "p_gene_summary_stacked.png"), height = 5, width = 6)
+ggsave(patch3, file = paste0(output, "p_gene_summary_hist_patch3.png"), height = 5, width = 10)
 
 ggsave(patch1, file = paste0(clinvar_out, "p_gene_summary_patch1.png"), height = 5, width = 6)
 ggsave(p1, file = paste0(clinvar_out, "p_gene_summary_p1.png"), height = 4, width = 6)
 ggsave(patch2, file = paste0(clinvar_out, "p_gene_summary_hist_patch2.png"), height = 5, width = 6)
 ggsave(p1_hist, file = paste0(clinvar_out, "p_gene_summary_p1_hist.png"), height = 4, width = 6)
 ggsave(p_stacked, file = paste0(clinvar_out, "p_gene_summary_stacked.png"), height = 5, width = 6)
+ggsave(patch3, file = paste0(clinvar_out, "p_gene_summary_hist_patch3.png"), height = 5, width = 10)
 
 saveRDS(gene_variant_summary_clean, file = paste0(output, "gene_variant_summary.Rds"))
 saveRDS(gene_variant_summary_clean, file = paste0(clinvar_sum, "gene_variant_summary.Rds"))
+
 
 
 # Version 2 ----
@@ -353,15 +374,8 @@ final_results_gene_scored <- final_results_gene_scored %>%
   mutate(score_factor = factor(score, levels = unique(score))) %>%
   ungroup()
 
-
-
 final_results_gene_scored <- final_results_gene_scored %>%
   filter(!str_detect(GeneSymbol, ";"))
-
-
-
-
-
 
 names(final_results_gene_scored)
 

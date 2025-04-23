@@ -115,8 +115,9 @@ df_t <- reactable(
     
     score_positive_total = colDef(
       header = function() {
-        tippy("Gene score ClinVar pathogenicity &#9432;",
-              tooltip = "The total score of SNV from ClinVar for classifications Pathogenic (5), Likely pathogenic and low penetrance (2-4), Uncertain or Conflicting (0-2). Incidental benign variants are ignored in this score.",
+        # tippy("Gene score ClinVar pathogenicity &#9432;",
+        tippy("Score positive total &#9432;",
+              tooltip = "The total score of SNV from ClinVar for classifications that are: Pathogenic (5), Likely pathogenic and low penetrance (2-4), Uncertain or Conflicting (0-2). Incidental benign variants are ignored in this score.",
               delay = 0, theme = "custom")
       },
     ),

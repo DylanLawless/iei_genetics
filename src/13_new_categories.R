@@ -359,7 +359,7 @@ p_class <- ggplot(model_df_fine, aes(x = new_PID_classification_descriptive, fil
   scale_x_discrete(labels = function(x) str_wrap(gsub("_", " ", x), width = 15)) +
   labs(#subtitle = "B  Distribution of New PID Classifications",
     # subtitle = "B",
-       x = "PID classification:\nPPI + Phenotypes",
+       x = "PID classification:\nPPI ~ Phenotypes",
        y = "Gene count") +
   guides(fill = "none") +
   # theme(text=element_text(size=14)) +

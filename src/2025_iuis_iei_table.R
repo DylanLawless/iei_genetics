@@ -11,6 +11,7 @@ library(HPO.db)
 library(AnnotationDbi)
 library(ggplot2)
 library(sparkline)
+library(purrr)
 
 # source: https://wp-iuis.s3.eu-west-1.amazonaws.com/app/uploads/2024/10/30094653/IUIS-IEI-list-for-web-site-July-2024V2.xlsx
 source <- "../data/IUIS-IEI-list-for-web-site-July-2024V2.xlsx"

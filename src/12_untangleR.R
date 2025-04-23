@@ -5,6 +5,8 @@ library(ggraph)
 library(dplyr)
 library(tidyr)
 library(igraph)
+library(ggrepel)
+library(scales)
 set.seed(666)
 
 df <- readRDS("../output/df_processed.Rds")
@@ -109,6 +111,69 @@ p_net <- ggraph(layout_df) +
         axis.text = element_blank(),
         axis.ticks = element_blank())
 
+# publication version with a legend ----
+# prepare breakpoints
+sz    <- layout_df$size_color
+sz_br <- c(min(sz), median(sz), max(sz))
+sz_lb <- round(sz_br, 1)
+
+sn    <- layout_df$score_norm
+sn_br <- c(0, median(sn), 1)
+sn_lb <- round(sn_br, 2)
+
+p_net <- ggraph(layout_df) +
+  geom_edge_link(aes(width = weights), alpha = .3, colour = "grey50") +
+  scale_edge_width(range = c(.1, .4), guide = "none") +
+  
+  # black outline
+  geom_node_point(aes(size = size_color * 1.2), colour = "black", alpha = .8) +
+  # main nodes: size → size_color, colour → score_norm
+  geom_node_point(aes(size = size_color, colour = score_norm), alpha = .8) +
+  
+  # size legend
+  scale_size_continuous(
+    range  = c(3, 15),
+    breaks = sz_br,
+    labels = sz_lb,
+    name   = "Node size\n(scaled variants)"
+  ) +
+  
+  # colour legend (using your four‐step palette)
+  scale_colour_gradientn(
+    colours = c("lightyellow", "orange", "red", "darkred"),
+    limits  = c(0, 1),
+    breaks  = sn_br,
+    labels  = sn_lb,
+    name    = "Normalised\nscore- \npositive-total"
+  ) +
+  
+  # highlight labels on top 15 by score_norm
+  {
+    top15 <- layout_df %>%
+      arrange(desc(score_norm)) %>%
+      slice_head(n = 15)
+    geom_label_repel(
+      data               = top15,
+      aes(x = x, y = y, label = label),
+      fill               = alpha("white", .5),
+      size               = text_size,
+      colour             = "black",
+      max.overlaps       = Inf,
+      force              = 20,
+      min.segment.length = 0
+    )
+  } +
+  
+  theme_minimal(base_size = 20) +
+  theme(
+    text              = element_text(family = "sans"),
+    panel.grid        = element_blank(),
+    axis.title        = element_blank(),
+    axis.text         = element_blank(),
+    axis.ticks        = element_blank(),
+    legend.background = element_rect(fill = "white", colour = "white")
+  )
+
 print(p_net)
 
 ggsave("../output/untangleR_ppi_network.pdf", plot = p_net, height = 7, width = 9)
@@ -186,25 +251,35 @@ library(patchwork)
   # theme(plot.tag = element_text(size = 24))
 
 design <- 
-  "1
- 1
- 2"
+  "1#
+   1#
+   23"
 
 patch1 <- p_net / (p1 + p2) + plot_annotation(tag_levels = 'A') &
-  theme(plot.tag = element_text(size = 30)) #& plot_layout(design = design)
+  theme(plot.tag = element_text(size = 30))
+
+# patch1 <- (p_net) / (p1 + p2) + plot_annotation(tag_levels = 'A') &
+#   theme(plot.tag = element_text(size = 30)) &
+#   plot_layout(  widths = c(1, 1, 1),
+#                 heights = c(2.5, 2, 2))
 
 # patch1
 
 # ggsave("../output/untangleR_ppi_network_assoc_patch1.pdf", plot = patch1, height = 10, width = 12)
 ggsave("../output/untangleR_ppi_network_assoc_patch1.jpg",
        plot = patch1,
-       height = 8, width = 11,
+       height = 11, width = 15,
        dpi = 110)
+
+# ggsave("../output/untangleR_ppi_network_assoc_patch1.jpg",
+# plot = patch1,
+# height = 8, width = 11,
+# dpi = 110)
 
 # For JPEG: reduce the dpi to lower the file size (adjust dpi as needed)
 ggsave("~/web/var_risk_est/images/untangleR_ppi_network_assoc_patch1.jpg",
        plot = patch1,
-       height = 8, width = 11,
+       height = 11, width = 15,
        dpi = 110)
 
 # PPI Netowrk plot ----
